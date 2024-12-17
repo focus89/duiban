@@ -1,0 +1,141 @@
+<view class="container">
+  <!-- 未登录状态 -->
+  <view class="login-container" wx:if="{{!userInfo}}">
+    <image class="login-avatar" src="/images/default-avatar.png" mode="aspectFill" />
+    <text class="login-tip">登录后查看我的作品</text>
+    <button class="login-button wechat" 
+            open-type="chooseAvatar" 
+            bindchooseavatar="handleWechatLogin">
+      <image class="wechat-icon" src="/images/icons/wechat.svg" mode="aspectFit" />
+      微信一键登录
+    </button>
+  </view>
+
+  <!-- 已登录状态 -->
+  <block wx:else>
+    <!-- 页面标题 -->
+    <view class="page-header" style="height: {{menuButtonBottom}}px;">
+      <text class="page-title">我的</text>
+    </view>
+
+    <!-- 参考线 -->
+    <view class="reference-line" style="top: {{menuButtonBottom}}px;"></view>
+
+    <!-- 内容区域 -->
+    <view class="page-content" style="padding-top: {{menuButtonBottom}}px;">
+      <!-- 用户信息 -->
+      <view class="user-info">
+        <image class="avatar" 
+               src="{{userInfo.avatarUrl}}" 
+               mode="aspectFill" 
+               bindtap="handleLogout" />
+        <view class="user-detail">
+          <text class="nickname">{{userInfo.nickName}}</text>
+        </view>
+      </view>
+
+      <!-- 标签页 -->
+      <view class="tabs">
+        <view class="tab {{activeTab === 'works' ? 'active' : ''}}" 
+              bindtap="switchTab" 
+              data-tab="works">我的作品</view>
+        <view class="tab {{activeTab === 'drafts' ? 'active' : ''}}" 
+              bindtap="switchTab" 
+              data-tab="drafts">草稿箱</view>
+      </view>
+
+      <!-- 作品列表 -->
+      <block wx:if="{{activeTab === 'works'}}">
+        <view class="works-list">
+          <view class="empty-state" wx:if="{{!isLoading && works.length === 0}}">
+            <image src="/images/empty-state.svg" mode="aspectFit" />
+            <text>还没有作品，快去创作吧</text>
+          </view>
+          <view class="work-item" 
+                wx:for="{{works}}" 
+                wx:key="_id">
+            <view class="work-content" bindtap="onWorkTap" data-id="{{item._id}}">
+              <image class="work-cover" 
+                     src="{{item.coverImage}}" 
+                     mode="aspectFill"
+                     lazy-load="true" />
+              <view class="work-info">
+                <text class="work-title">{{item.title || '未命名作品'}}</text>
+                <text class="work-time">{{item.publishTime}}</text>
+              </view>
+            </view>
+            <view class="work-actions">
+              <view class="author">
+                <image class="author-avatar" 
+                       src="{{userInfo.avatarUrl}}" 
+                       mode="aspectFill" />
+              </view>
+              <view class="delete-button" 
+                    catchtap="onDeleteWork" 
+                    data-id="{{item._id}}">
+                <image class="delete-icon" src="/images/icons/delete.svg" mode="aspectFit" />
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+
+      <!-- 草稿列表 -->
+      <block wx:else>
+        <view class="drafts-list">
+          <view class="empty-state" wx:if="{{!isLoading && drafts.length === 0}}">
+            <image src="/images/empty-state.svg" mode="aspectFit" />
+            <text>没有草稿</text>
+          </view>
+          <view class="draft-item" 
+                wx:for="{{drafts}}" 
+                wx:key="_id"
+                bindtap="onDraftTap"
+                data-id="{{item._id}}">
+            <view class="draft-content">
+              <view class="draft-cover-container">
+                <view class="draft-page" style="background-color: {{item.work.pages[0].backgroundColor}}">
+                  <block wx:for="{{item.work.pages[0].elements}}" wx:key="id" wx:for-item="element">
+                    <image 
+                      wx:if="{{element.type === 'image'}}"
+                      class="element image-element"
+                      src="{{element.url}}"
+                      mode="aspectFill"
+                      style="left: {{element.x}}rpx; top: {{element.y}}rpx; width: {{element.width}}rpx; height: {{element.height}}rpx; transform: rotate({{element.rotation || 0}}deg); z-index: {{element.zIndex}};"
+                    />
+                  </block>
+                </view>
+                <view class="draft-page-count">{{item.work.pages.length}}页</view>
+              </view>
+              <view class="draft-info">
+                <text class="draft-title">{{item.work.title || '未命名作品'}}</text>
+                <text class="draft-time">{{item.updateTime}}</text>
+              </view>
+            </view>
+            <view class="draft-actions">
+              <view class="author">
+                <image class="author-avatar" 
+                       src="{{userInfo.avatarUrl}}" 
+                       mode="aspectFill" />
+              </view>
+              <view class="delete-button" 
+                    catchtap="onDeleteDraft" 
+                    data-id="{{item._id}}">
+                <image class="delete-icon" src="/images/icons/delete.svg" mode="aspectFit" />
+              </view>
+            </view>
+          </view>
+        </view>
+      </block>
+    </view>
+  </block>
+
+  <!-- 加载中状态 -->
+  <view class="loading-state" wx:if="{{isLoading}}">
+    <image class="loading-icon" src="/images/icons/loading.svg" />
+    <text>加载中...</text>
+  </view>
+
+  <!-- 隐藏的缩略图画布 -->
+  <canvas type="2d" id="thumbnailCanvas" style="position: absolute; left: -9999px; width: 300px; height: 169px;"></canvas>
+</view> 

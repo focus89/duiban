@@ -1,0 +1,57 @@
+<view class="container">
+  <!-- 搜索栏 -->
+  <view class="search-bar">
+    <input class="search-input" 
+           placeholder="搜索素材" 
+           bindinput="onSearchInput"
+           value="{{searchKeyword}}" />
+  </view>
+
+  <!-- 分类标签 -->
+  <scroll-view class="category-list" scroll-x>
+    <view class="category-item {{currentCategory === '' ? 'active' : ''}}"
+          bindtap="onCategoryTap"
+          data-category="">全部</view>
+    <view class="category-item {{currentCategory === category ? 'active' : ''}}"
+          wx:for="{{categories}}"
+          wx:key="*this"
+          wx:for-item="category"
+          bindtap="onCategoryTap"
+          data-category="{{category}}">
+      {{category}}
+    </view>
+  </scroll-view>
+
+  <!-- 素材列表 -->
+  <scroll-view class="material-list" 
+               scroll-y 
+               bindscrolltolower="onLoadMore">
+    <view class="material-grid">
+      <view class="material-item"
+            wx:for="{{materials}}"
+            wx:key="id"
+            bindtap="onMaterialTap"
+            data-material="{{item}}">
+        <image class="material-image" 
+               src="{{item.url}}" 
+               mode="aspectFill" />
+        <view class="material-info">
+          <text class="material-name">{{item.name}}</text>
+          <text class="material-author">{{item.author.nickname}}</text>
+        </view>
+      </view>
+    </view>
+    
+    <!-- 加载状态 -->
+    <view class="loading-state" wx:if="{{isLoading}}">
+      <image class="loading-icon" src="../../images/icons/loading.svg" />
+      <text>加载中...</text>
+    </view>
+    
+    <!-- 空状态 -->
+    <view class="empty-state" wx:if="{{materials.length === 0 && !isLoading}}">
+      <image class="empty-icon" src="../../images/empty-state.svg" />
+      <text>暂无素材</text>
+    </view>
+  </scroll-view>
+</view> 

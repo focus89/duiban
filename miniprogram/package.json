@@ -1,0 +1,16 @@
+{
+  "name": "duiban-miniprogram",
+  "version": "1.0.0",
+  "description": "堆伴小程序",
+  "scripts": {
+    "install-deps": "npm install"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.26.0",
+    "core-js": "^3.30.2",
+    "regenerator-runtime": "^0.13.11"
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "3.12.0"
+  }
+}

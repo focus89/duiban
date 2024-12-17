@@ -1,0 +1,121 @@
+/**app.scss**/
+page {
+  --primary-color: #333333;
+  --secondary-color: #666666;
+  --background-color: #f5f5f5;
+  --border-color: #e5e5e5;
+  --success-color: #07c160;
+  --warning-color: #ff976a;
+  --error-color: #ee0a24;
+  
+  height: 100vh;
+  font-size: 28rpx;
+  line-height: 1.5;
+  background: var(--background-color);
+  color: var(--primary-color);
+}
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.safe-area-bottom {
+  padding-bottom: constant(safe-area-inset-bottom);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.safe-area-top {
+  padding-top: constant(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top);
+}
+
+// 通用动画
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideDown {
+  from {
+    transform: translateY(-100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+// 通用类
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-up {
+  animation: slideUp 0.3s ease-in-out;
+}
+
+.slide-down {
+  animation: slideDown 0.3s ease-in-out;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 自定义导航栏样式
+.custom-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  
+  &__content {
+    position: relative;
+    display: flex;
+    align-items: center;
+    height: 44px;
+    padding: 0 10px;
+  }
+  
+  &__title {
+    flex: 1;
+    text-align: center;
+    font-size: 34rpx;
+    font-weight: 500;
+  }
+  
+  &__back {
+    padding: 10rpx 20rpx;
+  }
+}
+
+// 底部安全区
+.bottom-safe-area {
+  height: constant(safe-area-inset-bottom);
+  height: env(safe-area-inset-bottom);
+} 

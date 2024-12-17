@@ -1,0 +1,93 @@
+<view class="container">
+  <!-- 作品展示区域 -->
+  <swiper class="work-swiper" bindchange="onWorkChange" vertical="true">
+    <swiper-item wx:for="{{workList.works}}" wx:key="id" class="work-item">
+      <!-- 作品页面滑块 -->
+      <swiper class="page-swiper" bindchange="onPageChange" current="{{currentPageIndex}}" data-work-index="{{index}}">
+        <swiper-item wx:for="{{item.pages}}" wx:key="id" wx:for-item="page" class="page-item">
+          <!-- 页面背景 -->
+          <view class="page-background" style="background-color: {{page.backgroundColor}}">
+            <!-- 页面元素 -->
+            <block wx:for="{{page.elements}}" wx:key="id" wx:for-item="element">
+              <!-- 图片元素 -->
+              <image 
+                wx:if="{{element.type === 'image'}}"
+                class="element image-element"
+                src="{{element.url}}"
+                style="left: {{element.x}}rpx; top: {{element.y}}rpx; width: {{element.width}}rpx; height: {{element.height}}rpx; transform: rotate({{element.rotation || 0}}deg); z-index: {{element.zIndex}};"
+              />
+              
+              <!-- 形状元素 -->
+              <view 
+                wx:if="{{element.type === 'shape'}}"
+                class="element shape-element {{element.shapeType}}"
+                style="left: {{element.x}}rpx; top: {{element.y}}rpx; width: {{element.width}}rpx; height: {{element.height}}rpx; background-color: {{element.color}}; border: {{element.borderWidth}}rpx solid {{element.borderColor}}; transform: rotate({{element.rotation || 0}}deg); z-index: {{element.zIndex}};"
+              />
+              
+              <!-- 文本元素 -->
+              <text 
+                wx:if="{{element.type === 'text'}}"
+                class="element text-element"
+                style="left: {{element.x}}rpx; top: {{element.y}}rpx; width: {{element.width}}rpx; font-size: {{element.fontSize}}rpx; color: {{element.color}}; text-align: {{element.alignment}}; transform: rotate({{element.rotation || 0}}deg); z-index: {{element.zIndex}};"
+              >{{element.content}}</text>
+              
+              <!-- 音频元素 -->
+              <view 
+                wx:if="{{element.type === 'audio'}}"
+                class="element audio-element"
+                style="left: {{element.x}}rpx; top: {{element.y}}rpx; transform: rotate({{element.rotation || 0}}deg); z-index: {{element.zIndex}};"
+                bindtap="onAudioTap"
+                data-element="{{element}}"
+              >
+                <image class="audio-icon" src="/images/icons/{{isPlaying && currentAudioId === element.id ? 'pause' : 'play'}}.png" />
+              </view>
+            </block>
+          </view>
+        </swiper-item>
+      </swiper>
+
+      <!-- 页面指示器 -->
+      <view class="page-indicator">
+        <view 
+          wx:for="{{item.pages}}" 
+          wx:key="id" 
+          class="indicator-dot {{currentPageIndex === index ? 'active' : ''}}"
+        />
+      </view>
+
+      <!-- 作品信息 -->
+      <view class="work-info">
+        <view class="author-info">
+          <image class="avatar" src="{{item.author.avatar}}" />
+          <text class="name">{{item.author.name}}</text>
+        </view>
+        <view class="stats">
+          <view class="stat-item" bindtap="onLikeTap" data-work-id="{{item.id}}">
+            <image class="stat-icon" src="/images/icons/{{item.isLiked ? 'like-filled' : 'like'}}.png" />
+            <text class="stat-count">{{item.stats.likes}}</text>
+          </view>
+          <view class="stat-item">
+            <image class="stat-icon" src="/images/icons/view.png" />
+            <text class="stat-count">{{item.stats.views}}</text>
+          </view>
+          <view class="stat-item" bindtap="onShareTap" data-work-id="{{item.id}}">
+            <image class="stat-icon" src="/images/icons/share.png" />
+            <text class="stat-count">{{item.stats.shares}}</text>
+          </view>
+        </view>
+      </view>
+    </swiper-item>
+  </swiper>
+
+  <!-- 加载提示 -->
+  <view class="loading" wx:if="{{isLoading}}">
+    <image class="loading-icon" src="/images/icons/loading.png" />
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:if="{{!isLoading && (!workList.works || workList.works.length === 0)}}">
+    <image class="empty-icon" src="/images/empty-state.svg" />
+    <text class="empty-text">暂无作品</text>
+  </view>
+</view> 

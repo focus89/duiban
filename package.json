@@ -1,0 +1,15 @@
+{
+  "name": "duiban",
+  "version": "1.0.0",
+  "description": "堆伴小程序",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.22.0"
+  },
+  "devDependencies": {
+    "miniprogram-api-typings": "^3.12.0"
+  }
+} 

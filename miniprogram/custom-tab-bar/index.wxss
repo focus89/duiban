@@ -1,0 +1,76 @@
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120rpx;
+  background-color: transparent;
+  display: flex;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 999;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+  opacity: 1;
+  visibility: visible;
+}
+
+.tab-bar.visible {
+  transform: translateY(0);
+  animation: fadeInBackground 0.2s ease-out 0.3s forwards;
+}
+
+@keyframes fadeInBackground {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: #1a1a1a;
+  }
+}
+
+.tab-bar.hidden {
+  transform: translateY(100%);
+  background-color: transparent;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.tab-bar-border {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 1rpx;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.tab-bar-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 8rpx 0;
+}
+
+.tab-bar-icon {
+  width: 48rpx;
+  height: 48rpx;
+  margin-bottom: 8rpx;
+}
+
+.tab-bar-item:nth-child(2) .tab-bar-icon {
+  width: 56rpx;
+  height: 56rpx;
+}
+
+.tab-bar-text {
+  font-size: 24rpx;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.tab-bar-item.selected .tab-bar-text {
+  color: #ffffff;
+} 

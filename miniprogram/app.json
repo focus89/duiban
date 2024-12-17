@@ -1,0 +1,32 @@
+{
+  "pages": [
+    "pages/work/work",
+    "pages/create/create",
+    "pages/profile/profile",
+    "pages/comments/comments",
+    "pages/drafts/drafts"
+  ],
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#000000",
+    "navigationBarTitleText": "对班",
+    "navigationBarTextStyle": "white",
+    "navigationStyle": "custom"
+  },
+  "tabBar": {
+    "custom": true,
+    "list": [
+      {
+        "pagePath": "pages/work/work",
+        "text": "浏览"
+      },
+      {
+        "pagePath": "pages/profile/profile",
+        "text": "我的"
+      }
+    ]
+  },
+  "sitemapLocation": "sitemap.json",
+  "usingComponents": {},
+  "subpackages": []
+} 

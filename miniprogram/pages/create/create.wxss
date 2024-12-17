@@ -1,0 +1,997 @@
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #1a1a1a;
+}
+
+/* 顶部导航栏 */
+.top-bar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top) 32rpx 0;
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #2a2a2a;
+}
+
+.back-button, .settings-button {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 36rpx;
+}
+
+.back-button:active, .settings-button:active {
+  background-color: #2a2a2a;
+}
+
+.icon {
+  width: 48rpx;
+  height: 48rpx;
+  filter: invert(1);
+}
+
+.title {
+  font-size: 32rpx;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+/* 画布区域 */
+.canvas-area {
+  flex: 1;
+  width: 100%;
+  height: calc(100vh - 120rpx - env(safe-area-inset-bottom));
+  position: relative;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+/* 画布内容 */
+.canvas-content {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+  background-color: #ffffff;
+}
+
+/* 撤销/重做按钮 */
+.history-buttons {
+  position: fixed;
+  left: 32rpx;
+  bottom: calc(120rpx + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 12rpx;
+  z-index: 101;
+  padding: 12rpx;
+  border-radius: 16rpx;
+}
+
+.history-button {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 12rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  background-color: rgba(26, 26, 26, 0.9);
+  backdrop-filter: blur(8rpx);
+}
+
+.history-button .icon {
+  width: 40rpx;
+  height: 40rpx;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
+.history-button.disabled {
+  opacity: 0.3;
+  pointer-events: none;
+}
+
+.history-button:active {
+  background-color: rgba(26, 26, 26, 0.7);
+}
+
+.element-container {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center;
+}
+
+.element-container.selected {
+  outline: 2rpx solid #007AFF;
+  outline-offset: 2rpx;
+}
+
+.element {
+  width: 100%;
+  height: 100%;
+  position: relative;
+}
+
+/* 元素类型样式 */
+.image-element {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.shape-element {
+  width: 100%;
+  height: 100%;
+}
+
+.shape-element.rectangle {
+  border-radius: 0;
+}
+
+.shape-element.circle {
+  border-radius: 50%;
+}
+
+.shape-element.triangle {
+  clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+}
+
+.text-element {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* 控制按钮基础样式 */
+.control-button {
+  position: absolute;
+  width: 60rpx;
+  height: 60rpx;
+  background-color: #007AFF;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+  z-index: 3;
+}
+
+.control-button::before {
+  content: '';
+  position: absolute;
+  top: -20rpx;
+  left: -20rpx;
+  right: -20rpx;
+  bottom: -20rpx;
+}
+
+.control-icon {
+  width: 32rpx;
+  height: 32rpx;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+}
+
+/* 删除按钮 - 正上方 */
+.delete-button {
+  top: -60rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8rpx);
+}
+
+.delete-button:active {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* 旋转按钮 - 正下方 */
+.rotate-button {
+  bottom: -80rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8rpx);
+}
+
+/* 旋转按钮连接线 */
+.rotate-button::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 2rpx;
+  height: 40rpx;
+  background-color: rgba(255, 255, 255, 0.5);
+  transform: translateX(-50%);
+}
+
+/* 旋转时的指示器 */
+.rotate-button:active {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.rotate-button:active::after {
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* 复制按钮 - 正左方 */
+.copy-button {
+  left: -60rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8rpx);
+}
+
+.copy-button:active {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* 全屏按钮 - 正右方 */
+.fullscreen-button {
+  right: -60rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  transition: all 0.2s ease;
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8rpx);
+}
+
+.fullscreen-button:active {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+/* 旋转时的虚线边框 */
+.element-container.rotating {
+  outline: 2rpx dashed #007AFF;
+  outline-offset: 4rpx;
+}
+
+/* 缩放控制点 */
+.resize-point {
+  position: absolute;
+  width: 24rpx;
+  height: 24rpx;
+  background-color: #007AFF;
+  border: 4rpx solid #ffffff;
+  border-radius: 50%;
+  z-index: 2;
+  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease;
+}
+
+.resize-point::before {
+  content: '';
+  position: absolute;
+  top: -20rpx;
+  left: -20rpx;
+  right: -20rpx;
+  bottom: -20rpx;
+}
+
+.resize-point.active {
+  transform: scale(1.2);
+  background-color: #0056b3;
+}
+
+.resize-point.top-left {
+  left: -12rpx;
+  top: -12rpx;
+  cursor: nw-resize;
+}
+
+.resize-point.top-right {
+  right: -12rpx;
+  top: -12rpx;
+  cursor: ne-resize;
+}
+
+.resize-point.bottom-left {
+  left: -12rpx;
+  bottom: -12rpx;
+  cursor: sw-resize;
+}
+
+.resize-point.bottom-right {
+  right: -12rpx;
+  bottom: -12rpx;
+  cursor: se-resize;
+}
+
+/* 底部工具栏 */
+.toolbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 120rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 32rpx;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 101;
+  transition: all 0.3s ease;
+  background-color: #1a1a1a;
+}
+
+/* 主工具栏样式 */
+.toolbar.primary {
+  background-color: #1a1a1a;
+}
+
+.toolbar.primary .tool-item {
+  width: 80rpx;
+  height: 80rpx;
+  background-color: #2a2a2a;
+  border-radius: 16rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toolbar.primary .tool-icon {
+  width: 48rpx;
+  height: 48rpx;
+  filter: invert(1);
+}
+
+/* 二级工具栏样式 */
+.toolbar.secondary {
+  background-color: #1a1a1a;
+}
+
+.toolbar.secondary .tool-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12rpx;
+  min-width: 80rpx;
+}
+
+.toolbar.secondary .tool-icon {
+  width: 48rpx;
+  height: 48rpx;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: contain;
+}
+
+/* 二级工具栏各按钮图标 */
+.toolbar.secondary .tool-item[data-tool="back"] .tool-icon {
+  background-image: url('../../images/icons/back.svg');
+  filter: brightness(0) invert(1);
+}
+
+.toolbar.secondary .tool-item[data-tool="adjust"] .tool-icon {
+  background-image: url('../../images/icons/adjust.svg');
+  filter: brightness(0) invert(1);
+}
+
+.toolbar.secondary .tool-item[data-tool="copy"] .tool-icon {
+  background-image: url('../../images/icons/copy-white.svg');
+  filter: brightness(0) invert(1);
+}
+
+.toolbar.secondary .tool-item[data-tool="layer"] .tool-icon {
+  background-image: url('../../images/icons/layer-white.svg');
+  filter: brightness(0) invert(1);
+}
+
+.toolbar.secondary .tool-item[data-tool="fullscreen"] .tool-icon {
+  background-image: url('../../images/icons/fullscreen-white.svg');
+  filter: brightness(0) invert(1);
+}
+
+.toolbar.secondary .tool-item[data-tool="delete"] .tool-icon {
+  background-image: url('../../images/icons/delete-white.svg');
+  filter: brightness(0) invert(1);
+}
+
+.tool-text {
+  font-size: 20rpx;
+  color: #ffffff;
+  margin-top: 4rpx;
+}
+
+.tool-item:active {
+  opacity: 0.7;
+}
+
+/* 预览模式下隐藏工具栏 */
+.preview-mode .toolbar {
+  display: none;
+}
+
+/* 导航栏右侧按钮 */
+.nav-right {
+  display: flex;
+  align-items: center;
+}
+
+.nav-settings {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-settings .icon {
+  width: 40rpx;
+  height: 40rpx;
+  filter: invert(1);
+}
+
+/* 页签栏 */
+.tabs-bar {
+  height: 72rpx;
+  background-color: #1a1a1a;
+  border-bottom: 1px solid #2a2a2a;
+  position: relative;
+  display: flex;
+}
+
+.tabs-scroll {
+  flex: 1;
+  width: 0;
+  white-space: nowrap;
+  margin-right: 88rpx;
+}
+
+.tabs-content {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12rpx;
+  height: 72rpx;
+}
+
+/* 关闭按钮 */
+.close-button {
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6rpx;
+  background-color: #2a2a2a;
+  margin-right: 12rpx;
+  flex-shrink: 0;
+}
+
+.close-button:active {
+  background-color: #3a3a3a;
+}
+
+.close-icon {
+  color: #ffffff;
+  font-size: 32rpx;
+  line-height: 1;
+  font-weight: 300;
+}
+
+/* 标签 */
+.tab {
+  min-width: 64rpx;
+  height: 48rpx;
+  background-color: #2a2a2a;
+  border-radius: 6rpx;
+  margin-right: 6rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 0 24rpx;
+  flex-shrink: 0;
+}
+
+.tab.active {
+  background-color: #3a3a3a;
+}
+
+.tab-text {
+  color: #ffffff;
+  font-size: 24rpx;
+}
+
+.tab-close {
+  position: absolute;
+  right: 6rpx;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20rpx;
+  height: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999999;
+  font-size: 18rpx;
+  border-radius: 10rpx;
+}
+
+.tab-close:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* 新增页签按钮 */
+.add-tab {
+  width: 48rpx;
+  height: 48rpx;
+  background-color: #2a2a2a;
+  border-radius: 6rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 6rpx;
+  flex-shrink: 0;
+}
+
+.add-tab:active {
+  background-color: #3a3a3a;
+}
+
+.add-icon {
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+/* 右侧按钮组 */
+.right-actions {
+  display: flex;
+  align-items: center;
+  background-color: rgba(26, 26, 26, 0.9);
+  padding: 8rpx;
+  border-radius: 12rpx;
+}
+
+/* 设置按钮和预览按钮共同样式 */
+.settings-button,
+.preview-button {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8rpx;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.settings-button {
+  margin-right: 8rpx;
+}
+
+.settings-button:active,
+.preview-button:active,
+.preview-button.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.settings-button .icon,
+.preview-button .icon {
+  width: 40rpx;
+  height: 40rpx;
+  filter: brightness(0) invert(1);
+}
+
+/* 对话框 */
+.dialog {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dialog-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.dialog-content {
+  position: relative;
+  width: 600rpx;
+  background-color: #1a1a1a;
+  border-radius: 20rpx;
+  padding: 32rpx;
+}
+
+.dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32rpx;
+}
+
+.dialog-title {
+  font-size: 32rpx;
+  color: #ffffff;
+  font-weight: bold;
+}
+
+.dialog-close {
+  width: 60rpx;
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+  color: #ffffff;
+}
+
+/* 颜色网格 */
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 16rpx;
+}
+
+.color-item {
+  aspect-ratio: 1;
+  border-radius: 16rpx;
+  border: 4rpx solid transparent;
+}
+
+.color-item.active {
+  border-color: #ffffff;
+}
+
+/* 设置表单 */
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+}
+
+.form-item {
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #ffffff;
+}
+
+.form-input {
+  height: 80rpx;
+  background-color: #2a2a2a;
+  border-radius: 12rpx;
+  padding: 0 24rpx;
+  font-size: 28rpx;
+  color: #ffffff;
+}
+
+.tag-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16rpx;
+}
+
+.tag {
+  height: 60rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2a2a2a;
+  border-radius: 30rpx;
+  font-size: 24rpx;
+  color: #ffffff;
+}
+
+.tag.active {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+.visibility-switch {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.switch-label {
+  font-size: 28rpx;
+  color: #ffffff;
+}
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 32rpx;
+  margin-top: 48rpx;
+}
+
+.btn-cancel, .btn-save {
+  min-width: 160rpx;
+  height: 72rpx;
+  border-radius: 36rpx;
+  font-size: 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-cancel {
+  background-color: #f5f5f5;
+  color: #666666;
+}
+
+.btn-save {
+  background-color: #007AFF;
+  color: #ffffff;
+}
+
+.btn-cancel:active {
+  background-color: #eeeeee;
+}
+
+.btn-save:active {
+  background-color: #0066cc;
+}
+
+.close-button {
+  min-width: 60rpx;
+  height: 56rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #2a2a2a;
+  border-radius: 6rpx;
+  margin-right: 16rpx;
+}
+
+.close-icon {
+  font-size: 36rpx;
+  color: #ffffff;
+  font-weight: bold;
+  line-height: 1;
+}
+
+.close-button:active {
+  background-color: #3a3a3a;
+}
+
+/* 预览按钮 */
+.preview-button {
+  width: 72rpx;
+  height: 72rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8rpx;
+  background-color: rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.preview-button .icon {
+  width: 40rpx;
+  height: 40rpx;
+  filter: brightness(0) invert(1);
+}
+
+/* 预览模式顶部栏 */
+.preview-bar {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: env(safe-area-inset-top) 32rpx 0;
+  background-color: transparent;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+}
+
+.preview-title {
+  font-size: 32rpx;
+  color: #fff;
+}
+
+.exit-preview {
+  display: flex;
+  align-items: center;
+  padding: 16rpx 24rpx;
+  border-radius: 32rpx;
+  background-color: rgba(0, 0, 0, 0.6);
+}
+
+.exit-preview .icon {
+  width: 32rpx;
+  height: 32rpx;
+  margin-right: 8rpx;
+}
+
+.exit-preview text {
+  color: #ffffff;
+  font-size: 28rpx;
+}
+
+/* 预览模式画布 */
+.canvas-area.preview-mode {
+  height: calc(100vh - 88rpx);
+}
+
+/* 页面指示器 */
+.page-indicator {
+  position: absolute;
+  bottom: 30rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.indicator {
+  width: 16rpx;
+  height: 16rpx;
+  margin: 0 8rpx;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s;
+}
+
+.indicator.active {
+  width: 24rpx;
+  background-color: #fff;
+}
+
+/* 页容器 */
+.pages-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.3s ease-out;
+}
+
+/* 页面 */
+.page {
+  flex: none;
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background-color: #fff;
+}
+
+/* 预览模式下的页面切换动画 */
+.preview-mode .pages-container {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 预览模式下的滑动过渡 */
+.preview-mode .pages-container.dragging {
+  transition: none;
+}
+
+/* 预览模式控制区 */
+.preview-controls {
+  position: fixed;
+  bottom: 40rpx;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 100;
+}
+
+/* 页面指示器 */
+.page-indicator {
+  display: flex;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.indicator {
+  width: 16rpx;
+  height: 16rpx;
+  margin: 0 8rpx;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.5);
+  transition: all 0.3s;
+}
+
+.indicator.active {
+  width: 24rpx;
+  background-color: #fff;
+}
+
+/* 发布按钮 */
+.publish-button {
+  position: fixed;
+  left: 50%;
+  bottom: 40rpx;
+  transform: translateX(-50%);
+  width: 320rpx;
+  height: 88rpx;
+  background: #007AFF;
+  border-radius: 44rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #FFFFFF;
+  font-size: 32rpx;
+  font-weight: 500;
+  box-shadow: 0 4rpx 12rpx rgba(0, 122, 255, 0.3);
+  z-index: 100;
+}
+
+.publish-button:active {
+  background: #0056b3;
+}
+
+/* 二级工具栏样式 */
+.toolbar.secondary {
+  background-color: #1a1a1a;
+}
+
+.toolbar.secondary .tool-icon {
+  width: 48rpx;
+  height: 48rpx;
+  filter: none;
+}
+
+/* 二级工具栏图标 - 使用白色SVG */
+.toolbar.secondary .tool-item[data-tool="adjust"] .tool-icon {
+  background: url('../../images/icons/adjust-white.svg') center/contain no-repeat;
+}
+
+.toolbar.secondary .tool-item[data-tool="copy"] .tool-icon {
+  background: url('../../images/icons/copy-white.svg') center/contain no-repeat;
+}
+
+.toolbar.secondary .tool-item[data-tool="layer"] .tool-icon {
+  background: url('../../images/icons/layer-white.svg') center/contain no-repeat;
+}
+
+.toolbar.secondary .tool-item[data-tool="fullscreen"] .tool-icon {
+  background: url('../../images/icons/fullscreen-white.svg') center/contain no-repeat;
+}
+
+.toolbar.secondary .tool-item[data-tool="delete"] .tool-icon {
+  background: url('../../images/icons/delete-white.svg') center/contain no-repeat;
+}
+
+/* 移除可能冲突的通用图标样式 */
+.toolbar .tool-icon {
+  width: 48rpx;
+  height: 48rpx;
+}
+
+/* 主工具栏图标样式 */
+.toolbar.primary .tool-icon {
+  filter: invert(1);
+}
+
+/* 控制按钮图标样式 */
+.control-icon {
+  width: 32rpx;
+  height: 32rpx;
+  filter: brightness(0) invert(1);
+  opacity: 0.9;
+} 

@@ -1,0 +1,143 @@
+<view class="container" 
+  bind:touchstart="onTouchStart"
+  bind:touchmove="onTouchMove"
+  bind:touchend="onTouchEnd">
+  <!-- 加载状态 -->
+  <view class="loading" wx:if="{{isLoading}}">
+    <image class="loading-icon" src="/images/loading.png" />
+    <text class="loading-text">加载中...</text>
+  </view>
+
+  <!-- 空状态 -->
+  <view class="empty-state" wx:elif="{{isEmpty}}">
+    <image class="empty-icon" src="/images/empty-state.svg" />
+    <text class="empty-text">暂无作品</text>
+    <text class="empty-subtext">快来创作你的第一个作品吧</text>
+    <button class="create-button" bindtap="goToCreate">立即创作</button>
+  </view>
+
+  <!-- 作品展示区域 -->
+  <view class="work-display" wx:else>
+    <view class="work-container {{isTransitioning ? 'transitioning' : ''}} {{isDragging ? 'dragging' : ''}}" 
+          style="transform: translate3d(0, {{currentTranslateY}}px, 0)">
+      <!-- 上一个作品 -->
+      <view class="adjacent-work previous" wx:if="{{currentWorkIndex > 0}}">
+        <view class="page">
+          <view class="page-background"></view>
+          <view class="element" 
+                wx:for="{{workList[currentWorkIndex - 1].pages[0].elements}}" 
+                wx:key="id"
+                style="left: {{item.x}}rpx; top: {{item.y}}rpx; width: {{item.width}}rpx; height: {{item.height}}rpx; transform: rotate({{item.rotation || 0}}deg);">
+            <image 
+              wx:if="{{item.type === 'image'}}" 
+              src="{{item.url}}" 
+              mode="aspectFill"
+              lazy-load="{{true}}"
+            />
+            <text wx:if="{{item.type === 'text'}}" 
+                  style="font-size: {{item.fontSize}}rpx; color: {{item.color}};">
+              {{item.content}}
+            </text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 当前作品的页面容器 -->
+      <view class="pages-container">
+        <view class="pages-wrapper {{isDragging ? 'dragging' : ''}} {{isTransitioning ? 'transitioning' : ''}}" 
+              style="transform: translate3d({{currentTranslateX}}px, 0, 0) translate3d({{-currentPageIndex * 100}}%, 0, 0)">
+          <view class="page" 
+                wx:for="{{work.pages}}" 
+                wx:key="index"
+                style="width: {{100}}%">
+            <view class="page-background"></view>
+            <view class="element" 
+                  wx:for="{{item.elements}}" 
+                  wx:key="id"
+                  wx:for-item="element"
+                  style="left: {{element.x}}rpx; top: {{element.y}}rpx; width: {{element.width}}rpx; height: {{element.height}}rpx; transform: rotate({{element.rotation || 0}}deg);">
+              <image 
+                wx:if="{{element.type === 'image'}}" 
+                src="{{element.url}}" 
+                mode="aspectFill"
+                lazy-load="{{false}}"
+              />
+              <text wx:if="{{element.type === 'text'}}" 
+                    style="font-size: {{element.fontSize}}rpx; color: {{element.color}};">
+                {{element.content}}
+              </text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 底部页面指示器 -->
+        <view class="bottom-page-indicator" wx:if="{{work.pages.length > 1}}" catch:tap="stopPropagation" data-area="control">
+          <view 
+            class="dot {{index === currentPageIndex ? 'active' : ''}}" 
+            wx:for="{{work.pages}}" 
+            wx:key="index"
+          ></view>
+        </view>
+      </view>
+
+      <!-- 下一个作品 -->
+      <view class="adjacent-work next" wx:if="{{currentWorkIndex < workList.length - 1}}">
+        <view class="page">
+          <view class="page-background"></view>
+          <view class="element" 
+                wx:for="{{workList[currentWorkIndex + 1].pages[0].elements}}" 
+                wx:key="id"
+                style="left: {{item.x}}rpx; top: {{item.y}}rpx; width: {{item.width}}rpx; height: {{item.height}}rpx; transform: rotate({{item.rotation || 0}}deg);">
+            <image 
+              wx:if="{{item.type === 'image'}}" 
+              src="{{item.url}}" 
+              mode="aspectFill"
+              lazy-load="{{true}}"
+            />
+            <text wx:if="{{item.type === 'text'}}" 
+                  style="font-size: {{item.fontSize}}rpx; color: {{item.color}};">
+              {{item.content}}
+            </text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 右侧操作按钮 -->
+    <view class="side-actions {{showControls ? 'visible' : ''}}" catch:tap="stopPropagation" data-area="control">
+      <!-- 作者头像 -->
+      <view class="action-item" bindtap="onAuthorTap" data-area="control">
+        <view class="avatar-wrapper">
+          <image class="avatar" src="{{work.author.avatarUrl || '/images/default-avatar.png'}}" />
+          <view class="avatar-plus">
+            <image class="plus-icon" src="/images/icons/{{isFollowing ? 'plus-filled' : 'plus'}}.svg" />
+          </view>
+        </view>
+      </view>
+
+      <!-- 点赞按钮 -->
+      <view class="action-item {{isLiked ? 'active' : ''}}" bindtap="onLike" data-area="control">
+        <image class="action-icon" src="/images/icons/{{isLiked ? 'like-filled' : 'like'}}.svg" />
+        <text class="action-count">{{work.stats.likes || 0}}</text>
+      </view>
+
+      <!-- 评论按钮 -->
+      <view class="action-item" bindtap="onComment" data-area="control">
+        <image class="action-icon" src="/images/icons/comment.svg" />
+        <text class="action-count">{{work.stats.comments || 0}}</text>
+      </view>
+
+      <!-- 收藏按钮 -->
+      <view class="action-item {{isCollected ? 'active' : ''}}" bindtap="onCollect" data-area="control">
+        <image class="action-icon" src="/images/icons/{{isCollected ? 'star-filled' : 'star'}}.svg" />
+        <text class="action-count">{{work.stats.collects || 0}}</text>
+      </view>
+
+      <!-- 分享按钮 -->
+      <button class="action-item" open-type="share" data-area="control">
+        <image class="action-icon" src="/images/icons/share.svg" />
+        <text class="action-count">分享</text>
+      </button>
+    </view>
+  </view>
+</view> 

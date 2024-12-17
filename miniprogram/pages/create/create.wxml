@@ -1,0 +1,287 @@
+<view class="container">
+  <!-- 顶部导航栏 -->
+  <view class="top-bar">
+    <view class="title">{{work.title || '未命名作品'}}</view>
+  </view>
+
+  <!-- 页签栏 -->
+  <view class="tabs-bar" wx:if="{{!isPreviewMode}}">
+    <scroll-view class="tabs-scroll" scroll-x>
+      <view class="tabs-content">
+        <view class="close-button" bindtap="onExitEdit">
+          <text class="close-icon">×</text>
+        </view>
+        <view wx:for="{{work.pages}}" 
+              wx:key="id" 
+              class="tab {{currentPageIndex === index ? 'active' : ''}}" 
+              bindtap="onTabTap" 
+              data-index="{{index}}">
+          <text class="tab-text">{{index + 1}}</text>
+          <view class="tab-close" 
+                wx:if="{{work.pages.length > 1}}"
+                catchtap="onTabClose" 
+                data-index="{{index}}">×</view>
+        </view>
+        <view class="add-tab" 
+              bindtap="onAddPage" 
+              wx:if="{{work.pages.length < 4}}">
+          <text class="add-icon">+</text>
+        </view>
+      </view>
+    </scroll-view>
+    <view class="right-actions">
+      <view class="settings-button" bindtap="onSettingsTap">
+        <image class="icon" src="/images/icons/settings.svg" mode="aspectFit" />
+      </view>
+      <view class="preview-button {{isPreviewMode ? 'active' : ''}}" bindtap="togglePreviewMode">
+        <image class="icon" src="/images/icons/preview.svg" mode="aspectFit" />
+      </view>
+    </view>
+  </view>
+
+  <!-- 预览模式顶部栏 -->
+  <view class="preview-bar" wx:if="{{isPreviewMode}}">
+    <view class="exit-preview" bindtap="onExitPreview">
+      <image class="icon" src="../../images/icons/back.svg" />
+      <text>退出预览</text>
+    </view>
+  </view>
+
+  <!-- 画布区域 -->
+  <view class="canvas-area {{isPreviewMode ? 'preview-mode' : ''}}">
+    <!-- 撤销/反撤销按钮 -->
+    <view class="history-buttons" wx:if="{{!isPreviewMode}}">
+      <view class="history-button {{canUndo ? '' : 'disabled'}}" bindtap="onUndo">
+        <image class="icon" src="/images/icons/undo.svg" />
+      </view>
+      <view class="history-button {{canRedo ? '' : 'disabled'}}" bindtap="onRedo">
+        <image class="icon" src="/images/icons/redo.svg" />
+      </view>
+    </view>
+
+    <!-- 画布内容 -->
+    <view class="canvas-content" 
+          bindtap="{{!isPreviewMode ? 'onCanvasClick' : ''}}"
+          bindtouchstart="{{isPreviewMode ? 'onPreviewTouchStart' : 'onCanvasTouchStart'}}"
+          bindtouchmove="{{isPreviewMode ? 'onPreviewTouchMove' : 'onCanvasTouchMove'}}"
+          bindtouchend="{{isPreviewMode ? 'onPreviewTouchEnd' : 'onCanvasTouchEnd'}}">
+      <view class="pages-container" style="transform: translateX({{-currentPageIndex * 100}}%);">
+        <view class="page" 
+              wx:for="{{work.pages}}" 
+              wx:key="id"
+              style="background-color: {{item.backgroundColor}}">
+          <view class="element-container {{selectedElementId === element.id ? 'selected' : ''}}" 
+                wx:for="{{item.elements}}" 
+                wx:key="id"
+                wx:for-item="element"
+                style="left: {{element.x}}rpx; top: {{element.y}}rpx; width: {{element.width}}rpx; height: {{element.height}}rpx; transform: rotate({{element.rotation || 0}}deg); z-index: {{element.zIndex}}"
+                data-id="{{element.id}}"
+                catchtap="{{!isPreviewMode ? 'onElementTap' : ''}}">
+            
+            <view class="element">
+              <!-- 图片元素 -->
+              <image wx:if="{{element.type === 'image'}}" 
+                     class="image-element"
+                     src="{{element.url}}" 
+                     mode="aspectFit" />
+              
+              <!-- 形状元素 -->
+              <view wx:elif="{{element.type === 'shape'}}" 
+                    class="shape-element {{element.shapeType}}"
+                    style="background-color: {{element.color}}; border: {{element.borderWidth}}rpx solid {{element.borderColor}}" />
+              
+              <!-- 文本元素 -->
+              <text wx:elif="{{element.type === 'text'}}"
+                    class="text-element"
+                    style="font-size: {{element.fontSize}}rpx; font-family: {{element.fontFamily}}; color: {{element.color}}; text-align: {{element.alignment}}">
+                {{element.content}}
+              </text>
+            </view>
+
+            <!-- 选中状态的控制按钮 -->
+            <block wx:if="{{selectedElementId === element.id && !isPreviewMode}}">
+              <!-- 缩放控制点 -->
+              <view class="resize-point top-left {{isResizing && resizePosition === 'top-left' ? 'active' : ''}}"
+                    catchtouchstart="onControlPointTouchStart"
+                    catchtouchmove="onControlPointTouchMove"
+                    catchtouchend="onControlPointTouchEnd"
+                    data-position="top-left">
+              </view>
+              <view class="resize-point top-right {{isResizing && resizePosition === 'top-right' ? 'active' : ''}}"
+                    catchtouchstart="onControlPointTouchStart"
+                    catchtouchmove="onControlPointTouchMove"
+                    catchtouchend="onControlPointTouchEnd"
+                    data-position="top-right">
+              </view>
+              <view class="resize-point bottom-left {{isResizing && resizePosition === 'bottom-left' ? 'active' : ''}}"
+                    catchtouchstart="onControlPointTouchStart"
+                    catchtouchmove="onControlPointTouchMove"
+                    catchtouchend="onControlPointTouchEnd"
+                    data-position="bottom-left">
+              </view>
+              <view class="resize-point bottom-right {{isResizing && resizePosition === 'bottom-right' ? 'active' : ''}}"
+                    catchtouchstart="onControlPointTouchStart"
+                    catchtouchmove="onControlPointTouchMove"
+                    catchtouchend="onControlPointTouchEnd"
+                    data-position="bottom-right">
+              </view>
+
+              <!-- 其他控制按钮 -->
+              <view class="control-button delete-button" catchtap="onDeleteElement">
+                <image class="control-icon" src="/images/icons/delete.svg" mode="aspectFit" />
+              </view>
+              <view class="control-button fullscreen-button" catchtap="makeElementFullscreen">
+                <image class="control-icon" src="/images/icons/fullscreen.svg" mode="aspectFit" />
+              </view>
+              <view class="control-button rotate-button {{isRotating && rotatingElementId === element.id ? 'rotating' : ''}}"
+                    catchtouchstart="onControlPointTouchStart"
+                    catchtouchmove="onControlPointTouchMove"
+                    catchtouchend="onControlPointTouchEnd"
+                    data-position="rotate">
+                <image class="control-icon" src="/images/icons/rotate.svg" mode="aspectFit" />
+              </view>
+              <view class="control-button copy-button" catchtap="onCopyElement">
+                <image class="control-icon" src="/images/icons/copy.svg" mode="aspectFit" />
+              </view>
+            </block>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 预览模式页面指示器和发布按钮 -->
+    <view class="preview-controls" wx:if="{{isPreviewMode}}">
+      <!-- 页面指示器 -->
+      <view class="page-indicator" wx:if="{{work.pages.length > 1}}">
+        <view class="indicator {{currentPageIndex === index ? 'active' : ''}}"
+              wx:for="{{work.pages}}"
+              wx:key="id">
+        </view>
+      </view>
+
+      <!-- 发布按钮 -->
+      <view class="publish-button" wx:if="{{isPreviewMode}}" bindtap="publishWork">
+        发布作品
+      </view>
+    </view>
+  </view>
+
+  <!-- 底部工具栏 -->
+  <view class="toolbar {{selectedElementId ? 'secondary' : 'primary'}}" wx:if="{{!isPreviewMode}}">
+    <!-- 一级菜单 -->
+    <block wx:if="{{!selectedElementId}}">
+      <view class="tool-item" bindtap="onToolTap" data-tool="text">
+        <image class="tool-icon" src="/images/icons/text.svg" mode="aspectFit" />
+      </view>
+      <view class="tool-item" bindtap="onToolTap" data-tool="shape">
+        <image class="tool-icon" src="/images/icons/shape.svg" mode="aspectFit" />
+      </view>
+      <view class="tool-item" bindtap="onToolTap" data-tool="import">
+        <image class="tool-icon" src="/images/icons/image.svg" mode="aspectFit" />
+      </view>
+      <view class="tool-item" bindtap="onToolTap" data-tool="adjust">
+        <image class="tool-icon" src="/images/icons/adjust.svg" mode="aspectFit" />
+      </view>
+    </block>
+    
+    <!-- 二级菜单 -->
+    <block wx:else>
+      <view class="tool-item" bindtap="onBackToMainMenu" data-tool="back">
+        <image class="tool-icon" src="/images/icons/back.svg" mode="aspectFit" />
+        <text class="tool-text">返回</text>
+      </view>
+      <view class="tool-item" bindtap="onToolTap" data-tool="adjust">
+        <image class="tool-icon" src="/images/icons/adjust.svg" mode="aspectFit" />
+        <text class="tool-text">调节</text>
+      </view>
+      <view class="tool-item" bindtap="onToolTap" data-tool="fullscreen">
+        <image class="tool-icon" src="/images/icons/fullscreen.svg" mode="aspectFit" />
+        <text class="tool-text">全屏</text>
+      </view>
+      <view class="tool-item" bindtap="onToolTap" data-tool="copy">
+        <image class="tool-icon" src="/images/icons/copy.svg" mode="aspectFit" />
+        <text class="tool-text">复制</text>
+      </view>
+      <view class="tool-item" bindtap="onToolTap" data-tool="delete">
+        <image class="tool-icon" src="/images/icons/delete.svg" mode="aspectFit" />
+        <text class="tool-text">删除</text>
+      </view>
+      <view class="tool-item" bindtap="onToolTap" data-tool="layer">
+        <image class="tool-icon" src="/images/icons/layer.svg" mode="aspectFit" />
+        <text class="tool-text">层</text>
+      </view>
+    </block>
+  </view>
+
+  <!-- 背景颜色调节话框 -->
+  <view class="dialog background-dialog" wx:if="{{showBackgroundDialog}}">
+    <view class="dialog-mask" bindtap="onCloseBackgroundDialog"></view>
+    <view class="dialog-content">
+      <view class="dialog-header">
+        <text class="dialog-title">背景颜色</text>
+        <view class="dialog-close" bindtap="onCloseBackgroundDialog">×</view>
+      </view>
+      <view class="color-grid">
+        <view class="color-item {{currentPage.backgroundColor === color ? 'active' : ''}}"
+              wx:for="{{backgroundColors}}"
+              wx:key="*this"
+              wx:for-item="color"
+              style="background-color: {{color}}"
+              bindtap="onColorSelect"
+              data-color="{{color}}">
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 作品设置对话框 -->
+  <view class="dialog settings-dialog" wx:if="{{showSettingsDialog}}">
+    <view class="dialog-mask" bindtap="onCloseSettingsDialog"></view>
+    <view class="dialog-content">
+      <view class="dialog-header">
+        <text class="dialog-title">作品设置</text>
+        <view class="dialog-close" bindtap="onCloseSettingsDialog">×</view>
+      </view>
+      <form class="settings-form" bindsubmit="onUpdateSettings">
+        <view class="form-item">
+          <text class="form-label">作品标题</text>
+          <input class="form-input" 
+                 name="title" 
+                 value="{{work.title}}" 
+                 placeholder="请输入作品标题" />
+        </view>
+        <view class="form-item">
+          <text class="form-label">作品描述</text>
+          <textarea class="form-input" 
+                    name="description" 
+                    value="{{work.description}}" 
+                    placeholder="请输入作品描述"
+                    style="height: 160rpx;" />
+        </view>
+        <view class="form-item">
+          <text class="form-label">标签</text>
+          <view class="tag-grid">
+            <view class="tag {{work.tags.includes(tag) ? 'active' : ''}}"
+                  wx:for="{{['插画', '漫画', '设计', '摄影', '手绘', '写实', '抽象', '其他']}}"
+                  wx:key="*this"
+                  wx:for-item="tag"
+                  bindtap="onTagSelect"
+                  data-tag="{{tag}}">
+              {{tag}}
+            </view>
+          </view>
+        </view>
+        <view class="form-item">
+          <view class="visibility-switch">
+            <text class="switch-label">公开作品</text>
+            <switch name="isPublic" checked="{{work.isPublic}}" color="#007AFF" />
+          </view>
+        </view>
+        <view class="form-buttons">
+          <button class="btn-cancel" bindtap="onCloseSettingsDialog">取消</button>
+          <button class="btn-save" form-type="submit">保存</button>
+        </view>
+      </form>
+    </view>
+  </view>
+</view> 

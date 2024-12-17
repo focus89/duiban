@@ -1,0 +1,33 @@
+<view class="container">
+  <view class="header">
+    <text class="title">草稿箱</text>
+  </view>
+
+  <view class="draft-list">
+    <view class="draft-item" 
+          wx:for="{{drafts}}" 
+          wx:key="id"
+          bindtap="onDraftTap"
+          data-id="{{item.id}}">
+      <view class="draft-info">
+        <text class="draft-title">{{item.work.title || '未命名作品'}}</text>
+        <view class="draft-meta">
+          <text class="draft-pages">{{item.pageCount}}页</text>
+          <text class="draft-time">{{item.updateTime}}</text>
+        </view>
+      </view>
+      <view class="draft-actions">
+        <view class="action-button delete" 
+              catchtap="onDeleteDraft"
+              data-id="{{item.id}}">
+          <image class="icon" src="../../images/icons/delete.svg" />
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view class="empty-state" wx:if="{{drafts.length === 0}}">
+    <image class="empty-icon" src="../../images/empty-state.svg" />
+    <text class="empty-text">暂无草稿</text>
+  </view>
+</view> 
